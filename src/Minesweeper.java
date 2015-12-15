@@ -40,7 +40,7 @@ public class Minesweeper extends Applet implements MouseListener {
 		P3 = new Panel();
 		TimeRemaning = new Label("");
 		NG = new Label("New Game");
-		TURN = new Label("XXX");
+		TURN = new Label("XXX                                        ");
 		ScoreLabel = new Label(" Score : A [0] | B [0]      ");
 		round = 0;
 		score = new int[2];
@@ -99,7 +99,7 @@ public class Minesweeper extends Applet implements MouseListener {
 		int count = 0;
 		bombsremaining = numbombs;
 		Bombs.setText("  Bomb : " + Integer.toString(bombsremaining));
-		TURN.setText("Player A");
+		TURN.setText("Player A                        ");
 		ScoreLabel.setText(" Score : A [0] | B [0]      ");
 		score[0] = 0;
 		score[1] = 0;
@@ -195,9 +195,11 @@ public class Minesweeper extends Applet implements MouseListener {
 			// gameover ();
 			// table [x] [y].setBackground (Color.black);
 			// gameover = true;
-			table[x][y].setLabel("|>");
+			if(round == 0) table[x][y].setLabel("A");
+			else table[x][y].setLabel("B");
 			// table [x] [y].setForeground (Color.red);
-			table[x][y].setBackground(Color.red);
+			if(round == 0) table[x][y].setBackground(Color.red);
+			else table[x][y].setBackground(Color.blue);
 			table[x][y].setForeground(Color.white);
 			flag[x][y] = true;
 			checkwinbool[x][y] = true;
@@ -218,7 +220,7 @@ public class Minesweeper extends Applet implements MouseListener {
 		if (round == 0)
 			TURN.setText("Player A");
 		else
-			TURN.setText("Player B");
+			TURN.setText("Player B ... Please Wait");
 		exposed[x][y] = true;
 		checkwinbool[x][y] = true; // these set to true mean that the button has
 									// been clicked
@@ -255,7 +257,7 @@ public class Minesweeper extends Applet implements MouseListener {
 				} else if (temp.equals("")) {
 					temp = "?";
 					tab[i][j] = -1;
-				} else if (temp.equals("|>")) {
+				} else if (temp.equals("A") || temp.equals("B")) {
 					temp = "*";
 					tab[i][j] = 9;
 				} else {
@@ -274,15 +276,64 @@ public class Minesweeper extends Applet implements MouseListener {
 	}
 
 	public void callbot() {
-		int r = 0, c = 0;
-		for (r = 0; r < row; r++) {
-			for (c = 0; c < col; c++) {
-				if (canClick(r, c))
-					break;
-			}
-			if (c != col)
-				break;
+		try {
+		    Thread.sleep(500);                 //1000 milliseconds is one second.
+		} catch(InterruptedException ex) {
+		    Thread.currentThread().interrupt();
 		}
+		
+		int r = 0, c = 0,maxr=0,maxc=0;
+		double maxprob = 0;
+		int[][] temp = getTable();
+		int[][] dif = {	{-1,-1},{-1,0},{-1,1},
+				{0,-1},{0,1},
+				{1,-1},{1,0},{1,1} };
+		for(int i=0;i<row;i++){
+			for(int j=0;j<col;j++){
+				int count=0,countfound=0;
+				if(temp[i][j] >=1 && temp[i][j] <= 8){
+					for(int k=0;k<8;k++){
+						if(0 <= i+dif[k][0] && i+dif[k][0] < row && 0 <= j+dif[k][1] && j+dif[k][1] < col){
+							if(temp[i+dif[k][0]][j+dif[k][1]] == -1) count++;
+							else if(temp[i+dif[k][0]][j+dif[k][1]] == 9) countfound++;
+						}
+					}
+					if(count == 0) continue;
+					double val = 1.0*(temp[i][j]-countfound)/count;
+					if(val >= maxprob){
+						maxprob = val;
+						maxr = i;
+						maxc = j;
+					}
+					System.out.println(maxprob + " " + maxr + " " + maxc);
+				}
+				
+			}
+		}
+		for(int i=0;i<8;i++){
+			int ran = (int)(Math.random()*8);
+			int tt = dif[i][0]; dif[i][0] = dif[ran][0]; dif[ran][0] = tt;
+			tt = dif[i][1]; dif[i][1] = dif[ran][1]; dif[ran][1] = tt;
+		}
+		int k=0;
+		r = maxr; c=maxc;
+		do{
+			if(0 <= maxr+dif[k][0] && maxr+dif[k][0] < row && 0 <= maxc+dif[k][1] && maxc+dif[k][1] < col){
+				r = maxr + dif[k][0];
+				c = maxc + dif[k][1];
+			}
+			k++;
+			if(k==8){
+				for(int i=0;i<row;i++){
+					int j;
+					for(j=0;j<col;j++){
+						if(canClick(i,j)) break;
+					}
+					if(j!=col) break;
+				}
+			}
+		}while(!canClick(r, c));
+			
 		System.out.println("BOT : " + r + " " + c);
 		clickBoard(r, c);
 		getTable();
