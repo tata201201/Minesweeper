@@ -299,6 +299,45 @@ public class Minesweeper extends Applet implements MouseListener {
 						}
 					}
 					if(count == 0) continue;
+					if(temp[i][j] == countfound){
+						for(int k=0;k<8;k++){
+							if(0 <= i+dif[k][0] && i+dif[k][0] < row && 0 <= j+dif[k][1] && j+dif[k][1] < col){
+								if(temp[i+dif[k][0]][j+dif[k][1]] == -1) temp[i+dif[k][0]][j+dif[k][1]] = -99;
+							}
+						}
+						
+					}
+					/*
+					double val = 1.0*(temp[i][j]-countfound)/count;
+					if(val >= maxprob){
+						maxprob = val;
+						maxr = i;
+						maxc = j;
+					}
+					System.out.println(maxprob + " " + maxr + " " + maxc);
+					*/
+				}
+				
+			}
+		}
+		for(int i = 0; i<row;i++){
+			for(int j=0;j<col;j++)
+				System.out.print(temp[i][j] + "\t" );
+			System.out.println();
+		}
+		maxr = 0; maxc = 0; maxprob = 0;
+		for(int i=0;i<row;i++){
+			for(int j=0;j<col;j++){
+				int count=0,countfound=0;
+				if(temp[i][j] >=1 && temp[i][j] <= 8){
+					for(int k=0;k<8;k++){
+						if(0 <= i+dif[k][0] && i+dif[k][0] < row && 0 <= j+dif[k][1] && j+dif[k][1] < col){
+							if(temp[i+dif[k][0]][j+dif[k][1]] == -1) count++;
+							else if(temp[i+dif[k][0]][j+dif[k][1]] == 9) countfound++;
+						}
+					}
+					if(count == 0) continue;
+					if(temp[i][j] == countfound) continue;
 					double val = 1.0*(temp[i][j]-countfound)/count;
 					if(val >= maxprob){
 						maxprob = val;
@@ -318,21 +357,16 @@ public class Minesweeper extends Applet implements MouseListener {
 		int k=0;
 		r = maxr; c=maxc;
 		do{
+			if(k>=8){
+				r = (int)(Math.random()*row);
+				c = (int)(Math.random()*col);
+			}
 			if(0 <= maxr+dif[k][0] && maxr+dif[k][0] < row && 0 <= maxc+dif[k][1] && maxc+dif[k][1] < col){
 				r = maxr + dif[k][0];
 				c = maxc + dif[k][1];
 			}
 			k++;
-			if(k==8){
-				for(int i=0;i<row;i++){
-					int j;
-					for(j=0;j<col;j++){
-						if(canClick(i,j)) break;
-					}
-					if(j!=col) break;
-				}
-			}
-		}while(!canClick(r, c));
+		}while(!canClick(r, c) || temp[r][c] == -99);
 			
 		System.out.println("BOT : " + r + " " + c);
 		clickBoard(r, c);
