@@ -357,16 +357,23 @@ public class Minesweeper extends Applet implements MouseListener {
 		int k=0;
 		r = maxr; c=maxc;
 		do{
-			if(k>=8){
-				r = (int)(Math.random()*row);
-				c = (int)(Math.random()*col);
-			}
 			if(0 <= maxr+dif[k][0] && maxr+dif[k][0] < row && 0 <= maxc+dif[k][1] && maxc+dif[k][1] < col){
 				r = maxr + dif[k][0];
 				c = maxc + dif[k][1];
 			}
 			k++;
+			if(k>=8) break;
 		}while(!canClick(r, c) || temp[r][c] == -99);
+		if(k>=8){
+			int cc = 0;
+			do{
+				r = (int)(Math.random()*row);
+				c = (int)(Math.random()*col);
+				if(!canClick(r,c)) continue;
+				cc++;
+			} while(temp[r][c] != -99 && cc<=100);
+			
+		}
 			
 		System.out.println("BOT : " + r + " " + c);
 		clickBoard(r, c);
@@ -512,6 +519,8 @@ public class Minesweeper extends Applet implements MouseListener {
 		 */
 		if (bombsremaining > 0)
 			allexposed = false;
+		if(score[0]>numbombs/2 || score[1]>numbombs/2)
+			allexposed = true;
 		if (allexposed != false) {
 			// gameover ();
 			int x2 = (int) col / 2;
